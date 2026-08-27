@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Result Management System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f2f4f7;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 7px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 11px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #0d47a1;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .marks-title {
+            grid-column: 1 / -1;
+            color: #0d47a1;
+            border-bottom: 2px solid #0d47a1;
+            padding-bottom: 8px;
+            margin-top: 10px;
+        }
+
+        .buttons {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .calculate {
+            background-color: #0d47a1;
+            color: white;
+        }
+
+        .calculate:hover {
+            background-color: #08306b;
+        }
+
+        .reset {
+            background-color: #777;
+            color: white;
+        }
+
+        .reset:hover {
+            background-color: #555;
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            border-top: 3px solid #0d47a1;
+            padding-top: 25px;
+        }
+
+        .result h2 {
+            text-align: center;
+            color: #0d47a1;
+            margin-bottom: 20px;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box {
+            background: #f2f4f7;
+            padding: 12px;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #0d47a1;
+            color: white;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .summary-box {
+            padding: 15px;
+            background-color: #f2f4f7;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .summary-box strong {
+            display: block;
+            color: #0d47a1;
+            font-size: 20px;
+            margin-top: 5px;
+        }
+
+        .pass {
+            color: green;
+            font-weight: bold;
+        }
+
+        .fail {
+            color: red;
+            font-weight: bold;
+        }
+
+        .print-btn {
+            display: block;
+            margin: 20px auto 0;
+            background-color: #198754;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .form-grid,
+            .student-info {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .full-width,
+            .marks-title,
+            .buttons {
+                grid-column: auto;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+
+            .form-section,
+            .print-btn {
+                display: none;
+            }
+
+            .result {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>Student Result Management System</h1>
+        <p>Enter student details and marks to generate the result</p>
+    </div>
+
+    <div class="form-section">
+        <form id="resultForm">
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="name">Student Name</label>
+                    <input type="text" id="name" placeholder="Enter student name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="rollno">Roll Number</label>
+                    <input type="text" id="rollno" placeholder="Enter roll number" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="course">Course</label>
+                    <select id="course" required>
+                        <option value="">Select Course</option>
+                        <option>B.Tech</option>
+                        <option>BCA</option>
+                        <option>M.Tech</option>
+                        <option>MCA</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <select id="department" required>
+                        <option value="">Select Department</option>
+                        <option>Computer Science and Engineering</option>
+                        <option>Artificial Intelligence and Machine Learning</option>
+                        <option>Electronics and Communication Engineering</option>
+                        <option>Electrical and Electronics Engineering</option>
+                        <option>Mechanical Engineering</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="semester">Semester</label>
+                    <select id="semester" required>
+                        <option value="">Select Semester</option>
+                        <option>1st Semester</option>
+                        <option>2nd Semester</option>
+                        <option>3rd Semester</option>
+                        <option>4th Semester</option>
+                        <option>5th Semester</option>
+                        <option>6th Semester</option>
+                        <option>7th Semester</option>
+                        <option>8th Semester</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="academicYear">Academic Year</label>
+                    <input type="text" id="academicYear" placeholder="e.g. 2025-26" required>
+                </div>
+
+                <h3 class="marks-title">Subject Marks</h3>
+
+                <div class="form-group">
+                    <label for="sub1">Java / OOP</label>
+                    <input type="number" id="sub1" min="0" max="100" placeholder="Marks out of 100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sub2">Data Structures</label>
+                    <input type="number" id="sub2" min="0" max="100" placeholder="Marks out of 100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sub3">Database Management</label>
+                    <input type="number" id="sub3" min="0" max="100" placeholder="Marks out of 100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sub4">Web Development</label>
+                    <input type="number" id="sub4" min="0" max="100" placeholder="Marks out of 100" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="sub5">Artificial Intelligence</label>
+                    <input type="number" id="sub5" min="0" max="100" placeholder="Marks out of 100" required>
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="calculate">Generate Result</button>
+                    <button type="reset" class="reset" onclick="resetResult()">Reset</button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <div class="result" id="result">
+
+        <h2>Student Result</h2>
+
+        <div class="student-info">
+            <div class="info-box"><b>Name:</b> <span id="rName"></span></div>
+            <div class="info-box"><b>Roll Number:</b> <span id="rRoll"></span></div>
+            <div class="info-box"><b>Course:</b> <span id="rCourse"></span></div>
+            <div class="info-box"><b>Department:</b> <span id="rDepartment"></span></div>
+            <div class="info-box"><b>Semester:</b> <span id="rSemester"></span></div>
+            <div class="info-box"><b>Academic Year:</b> <span id="rYear"></span></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>S.No</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody id="resultTable"></tbody>
+        </table>
+
+        <div class="summary">
+            <div class="summary-box">
+                Total Marks
+                <strong id="total"></strong>
+            </div>
+
+            <div class="summary-box">
+                Percentage
+                <strong id="percentage"></strong>
+            </div>
+
+            <div class="summary-box">
+                Grade
+                <strong id="overallGrade"></strong>
+            </div>
+
+            <div class="summary-box">
+                Result
+                <strong id="overallResult"></strong>
+            </div>
+        </div>
+
+        <button class="print-btn" onclick="window.print()">Print Result</button>
+
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("resultForm");
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const roll = document.getElementById("rollno").value;
+        const course = document.getElementById("course").value;
+        const department = document.getElementById("department").value;
+        const semester = document.getElementById("semester").value;
+        const year = document.getElementById("academicYear").value;
+
+        const subjects = [
+            { name: "Java / OOP", marks: Number(document.getElementById("sub1").value) },
+            { name: "Data Structures", marks: Number(document.getElementById("sub2").value) },
+            { name: "Database Management", marks: Number(document.getElementById("sub3").value) },
+            { name: "Web Development", marks: Number(document.getElementById("sub4").value) },
+            { name: "Artificial Intelligence", marks: Number(document.getElementById("sub5").value) }
+        ];
+
+        const invalid = subjects.some(subject => subject.marks < 0 || subject.marks > 100);
+
+        if (invalid) {
+            alert("Marks must be between 0 and 100.");
+            return;
+        }
+
+        document.getElementById("rName").textContent = name;
+        document.getElementById("rRoll").textContent = roll;
+        document.getElementById("rCourse").textContent = course;
+        document.getElementById("rDepartment").textContent = department;
+        document.getElementById("rSemester").textContent = semester;
+        document.getElementById("rYear").textContent = year;
+
+        let total = 0;
+        let failed = false;
+        let tableHTML = "";
+
+        subjects.forEach((subject, index) => {
+            total += subject.marks;
+
+            const grade = getGrade(subject.marks);
+            const status = subject.marks >= 40 ? "Pass" : "Fail";
+
+            if (subject.marks < 40) {
+                failed = true;
+            }
+
+            tableHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${subject.name}</td>
+                    <td>${subject.marks}</td>
+                    <td>${grade}</td>
+                    <td class="${status === "Pass" ? "pass" : "fail"}">${status}</td>
+                </tr>
+            `;
+        });
+
+        const percentage = total / subjects.length;
+        const overallGrade = getOverallGrade(percentage);
+        const overallResult = failed ? "FAIL" : "PASS";
+
+        document.getElementById("resultTable").innerHTML = tableHTML;
+        document.getElementById("total").textContent = total + " / 500";
+        document.getElementById("percentage").textContent = percentage.toFixed(2) + "%";
+        document.getElementById("overallGrade").textContent = overallGrade;
+
+        const resultElement = document.getElementById("overallResult");
+        resultElement.textContent = overallResult;
+        resultElement.className = overallResult === "PASS" ? "pass" : "fail";
+
+        document.getElementById("result").style.display = "block";
+
+        document.getElementById("result").scrollIntoView({
+            behavior: "smooth"
+        });
+    });
+
+    function getGrade(marks) {
+        if (marks >= 90) return "A+";
+        if (marks >= 80) return "A";
+        if (marks >= 70) return "B";
+        if (marks >= 60) return "C";
+        if (marks >= 50) return "D";
+        if (marks >= 40) return "E";
+        return "F";
+    }
+
+    function getOverallGrade(percentage) {
+        if (percentage >= 90) return "A+";
+        if (percentage >= 80) return "A";
+        if (percentage >= 70) return "B";
+        if (percentage >= 60) return "C";
+        if (percentage >= 50) return "D";
+        if (percentage >= 40) return "E";
+        return "F";
+    }
+
+    function resetResult() {
+        document.getElementById("result").style.display = "none";
+    }
+</script>
+
+</body>
+</html>
